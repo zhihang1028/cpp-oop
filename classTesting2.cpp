@@ -59,7 +59,7 @@ int main(){
     Rectangle r2(10, 5);
     r2.printArea();
 
-    Square s4(3, 3);    // Actually no need pass height parameter bcs Cube same length all sides, but for demo purpose of proctected.
+    Square s4(3, 3);    // Actually no need pass height parameter bcs Cube same length all sides, but for demo purpose of proctected keyword.
     s4.printVolume();
 
     Rectangle r3(3, 4, 5);
