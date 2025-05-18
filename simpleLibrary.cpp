@@ -19,50 +19,40 @@ class Book{
 
 class Library{
     private:
-    Book *books = nullptr;
+    Book **bookArray = nullptr; // to store pointer in array
     int capacity;
     int currentSize = 0;
 
     public:
-    Library(int _capacity) : capacity(_capacity) {books = new Book[capacity];}
-    ~Library(){delete [] books;}
+    Library(int _capacity) : capacity(_capacity) {bookArray = new Book*[capacity];}
+    ~Library(){delete [] bookArray;}
 
-    void addBook(const Book &book){ // pass in const book by reference
+    void addBook(Book *&bookPtr){ // pass in book by reference
         if (currentSize < capacity){
-            books[currentSize] = book;
+            bookArray[currentSize] = bookPtr;
             currentSize ++;
-            cout << book.getTitle() << " added successfully." << endl;
+            cout << bookPtr->getTitle() << " added successfully." << endl;
         }
         else
-            cout << "Library is full. Unable to add " << book.getTitle() << endl;
+            cout << "Library is full. Unable to add " << bookPtr->getTitle() << endl;
     }
 
-    void removeBook(const Book &book){
-        if (currentSize != 0){
-            bool bookRemoved = 0;
-            for (int i = 0; i < currentSize; i++){
-                if (book.getTitle() == books[i].getTitle()){
-                    for (int j = i; j < currentSize - 1; j++){
-                        books[j] = books[j + 1];
-                    }
-                    currentSize--;
-                    cout << book.getTitle() << " is successfully removed." << endl;
-                    bookRemoved = 1;
-                } 
-            }
-            if (!bookRemoved){
-                cout << book.getTitle() << " is not in library. Unable to remove." << endl;
-            }
-
-        } else{
-            cout << "Library is empty. Unable to remove books." << endl;
-        }
+    void removeBook(int bookIndex){
+        if (bookIndex - 1 < currentSize){
+            cout << bookArray[bookIndex - 1]->getTitle() << " is successfully removed." << endl;
+            for (int i = bookIndex - 1; i < currentSize - 1; i++){
+                bookArray[i] = bookArray[i + 1];
+                }
+            currentSize--;
+        } else
+            cout << " Invalid index. Unable to remove." << endl;
     }
 
     void displayBooks()const {
         cout << "Books available: " << endl;
         for (int i = 0; i < currentSize; i++){
-            books[i].displayInfo();
+            cout << i + 1 << ". ";
+            bookArray[i]->displayInfo();
             //cout << books[i].getTitle() << endl;
         }
     }
@@ -73,11 +63,16 @@ class Library{
 
 int main(){
 
-    bool exit = 0;
-    Book book1("BookA", "AuthorA", 2000), book2("BookB", "AuthorB", 2001);
-    Library library(10);
+    bool exit = false;
+    //Book book1("BookA", "AuthorA", 2000), book2("BookB", "AuthorB", 2001);
+    int libSize = 0;
 
-    while (1){  //Program loop
+    cout << "Please enter your library capacity: " << endl;
+    cin >> libSize;
+
+    Library library(libSize);
+
+    while (!exit){  //Program loop
 
         int option;
 
@@ -91,50 +86,59 @@ int main(){
         cout << "Please enter an option:\n" << endl;
 
         cin >> option;
+        cin.ignore();   // clear \n after cin
 
         switch (option){
-            case 1:
-                int chooseBook;
-                cout << "Which book do you want to add?" << endl;
-                cout << "1. BookA" << endl;
-                cout << "2. BookB" << endl;
-                cin >> chooseBook;
-                switch (chooseBook){
-                    case 1:
-                        library.addBook(book1);
-                        break;
-                    case 2:
-                        library.addBook(book2);
-                        break;
-                }
-                continue;
+            
+            case 1:{
+                string addTitle, addAuthor;
+                int addYear;
 
-            case 2:
+                cout << "Enter the details of book you want to add: \n" << endl;
+                cout << "Title: " << endl;
+                getline(cin, addTitle);
+
+                cout << "Author: " << endl;
+                getline(cin, addAuthor);
+
+                cout << "Publish year: " << endl;
+                cin >> addYear;
+                cin.ignore();
+
+                Book *newBook = new Book(addTitle, addAuthor, addYear);
+                library.addBook(newBook);
+  
+                break;
+            }
+
+            case 2:{
                 int removeBook;
-                cout << "Which book do you want to remove?" << endl;
-                cout << "1. BookA" << endl;
-                cout << "2. BookB" << endl;
-                cin >> removeBook;
-                switch (removeBook){
-                    case 1:
-                        library.removeBook(book1);
-                        break;
-                    case 2:
-                        library.removeBook(book2);
-                        break;
-                }
-                continue;
+                if (library.getSize() > 0){
+                    cout << "Which book do you want to remove?" << endl;
+                    library.displayBooks();
+                    
+                    cin >> removeBook;
+                    cin.ignore();
 
-            case 3:
+                    library.removeBook(removeBook);
+                } else
+                    cout << "Library is empty. Unable to remove books." << endl;
+                break;
+            }
+
+            case 3:{
                 cout << "Current number of books in library: " << library.getSize() << endl;
                 if (library.getSize() > 0)
                     library.displayBooks();
-                continue;
-            case 0:
-                exit = 1;
                 break;
+            }
+            case 0:{
+                exit = true;
+                break;
+            }
             default:
-                continue;
+                cout << "Invalid option." << endl;
+                break;
         }
 
         if (exit)
