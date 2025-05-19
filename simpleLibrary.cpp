@@ -1,10 +1,15 @@
 #include <string>
 #include <iostream>
+#include <limits>   // for numeric_limits
 
 using namespace std;
 
-// memory management to be done. ie vector or linked list.
+// memory management to be done. ie vector, smart pointer or linked list.
 // memory leak check.
+// resizable library
+// input validation
+
+bool checkOption (int, int);
 
 class Book{
     private:
@@ -45,17 +50,17 @@ class Library{
             cout << "Library is full. Unable to add " << bookPtr->getTitle() << endl;
     }
 
-    void removeBook(int bookIndex){
+    void removeBook(const int bookIndex){
         if (bookIndex > 0 && bookIndex - 1 < currentSize){
             cout << bookArray[bookIndex - 1]->getTitle() << " is successfully removed." << endl;
             delete bookArray[bookIndex - 1];    // free up memory for the object
             for (int i = bookIndex - 1; i < currentSize - 1; i++){
                 bookArray[i] = bookArray[i + 1];    // remove the book and shift other books left
                 }
-            bookArray[currentSize] = nullptr;   // "delete" the unused pointer
+            //bookArray[currentSize] = nullptr;   // "delete" the unused pointer
             currentSize--;
         } else
-            cout << " Invalid index. Unable to remove." << endl;
+            cout << "\"" << bookIndex << "\" is not valid. Unable to remove." << endl;
     }
 
     void displayBooks()const {
@@ -68,6 +73,7 @@ class Library{
     }
 
     int getSize()const {return currentSize;}
+    int getCapacity()const {return capacity;}
     
 };
 
@@ -77,8 +83,14 @@ int main(){
     //Book book1("BookA", "AuthorA", 2000), book2("BookB", "AuthorB", 2001);
     int libSize = 0;
 
-    cout << "Please enter your library capacity: " << endl;
-    cin >> libSize;
+    while (true){
+        cout << "Please enter your library capacity: " << endl;
+        cin >> libSize;
+        if (checkOption(libSize, 100)){
+            cin.ignore();
+            break;
+        }
+    }
 
     Library library(libSize);
 
@@ -94,8 +106,11 @@ int main(){
         cout << "0. Exit program\n" << endl;
 
         cout << "Please enter an option:\n" << endl;
-
         cin >> option;
+
+        if (!checkOption(option, 3))
+            continue;
+
         cin.ignore();   // clear \n after cin
 
         switch (option){
@@ -138,6 +153,7 @@ int main(){
             }
 
             case 3:{
+                cout << "Current capacity of library: " << library.getCapacity() << endl;
                 cout << "Current number of books in library: " << library.getSize() << endl;
                 if (library.getSize() > 0)
                     library.displayBooks();
@@ -156,4 +172,17 @@ int main(){
         break;
     }
     return 0;
+}
+
+bool checkOption (int option, int max) {
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');    // clear invalid inputs
+        cout << "Please enter a valid input." << endl;
+        return false;
+    } else if (option > max || option < 0) {
+        cout << option << " is out of range." << endl;
+        return false;
+    } else
+        return true;
 }
