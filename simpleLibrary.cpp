@@ -1,6 +1,10 @@
-#include <iostream>
 #include <string>
+#include <iostream>
+
 using namespace std;
+
+// memory management to be done. ie vector or linked list.
+// memory leak check.
 
 class Book{
     private:
@@ -25,9 +29,13 @@ class Library{
 
     public:
     Library(int _capacity) : capacity(_capacity) {bookArray = new Book*[capacity];}
-    ~Library(){delete [] bookArray;}
+    ~Library(){
+        for (int i = 0; i < currentSize; i++)
+            delete bookArray[i];
+        delete [] bookArray;
+    }
 
-    void addBook(Book *&bookPtr){ // pass in book by reference
+    void addBook(Book *&bookPtr){ // pass in book object by reference
         if (currentSize < capacity){
             bookArray[currentSize] = bookPtr;
             currentSize ++;
@@ -38,11 +46,13 @@ class Library{
     }
 
     void removeBook(int bookIndex){
-        if (bookIndex - 1 < currentSize){
+        if (bookIndex > 0 && bookIndex - 1 < currentSize){
             cout << bookArray[bookIndex - 1]->getTitle() << " is successfully removed." << endl;
+            delete bookArray[bookIndex - 1];    // free up memory for the object
             for (int i = bookIndex - 1; i < currentSize - 1; i++){
-                bookArray[i] = bookArray[i + 1];
+                bookArray[i] = bookArray[i + 1];    // remove the book and shift other books left
                 }
+            bookArray[currentSize] = nullptr;   // "delete" the unused pointer
             currentSize--;
         } else
             cout << " Invalid index. Unable to remove." << endl;
@@ -121,6 +131,7 @@ int main(){
                     cin.ignore();
 
                     library.removeBook(removeBook);
+                    
                 } else
                     cout << "Library is empty. Unable to remove books." << endl;
                 break;
@@ -144,6 +155,5 @@ int main(){
         if (exit)
         break;
     }
-    
     return 0;
 }
